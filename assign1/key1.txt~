@@ -1,0 +1,53 @@
+ex1
+
+1. emacs exer1.html
+2. C-s HTML M-b
+3. C-s scavenger M-b
+4. C-s self-referential  M-b M-b
+5. C-s arrow M-b
+6. C-e
+7. C-a
+8. N/A
+9. N/A
+10. C-x C-c
+
+ex2
+1. emacs exer2.html
+2.C-s <!-- RET  M-a C-space C-s --> RET DEL
+3. repeat 2
+4. repeat 2
+5. C-s <!-- RET left left left left C-space C-s --> RET DEL
+repeat the above commands two more times
+
+ex3
+1.emacs exer3.html
+2.C-s Assignment 1 RET left 5
+repeat the above
+3.M-< C-s UTF-8 M-% US-ASCII C-g
+4.M-< C-s </ol> C-e RET
+
+ex4
+1.C-s <!-- RET left left left left C-space C-s --> RET M-w C-s + space space C-r C-r RET M-a C-space C-e M-w C-s C-y C-r C-r RET C-n C-y M-y
+2.C-s <!-- C-s  RET left left left left C-space C-s --> RET M-w C-p C-p C-a C-space C-e M-w C-s C-y C-r C-r RET C-n C-n C-y M-y
+
+3.C-s <!-- C-s C-s  RET left left left left C-space C-s --> RET M-w M-{ M-{ C-space C-e M-w C-s C-y C-r C-r RET C-n C-n C-y M-y
+C-a right del C-p right del 
+
+4.C-s <!-- C-s C-s  C-s RET left left left left C-space C-s --> RET M-w
+C-s <!-- RET left left left left C-space C-s --> RET M-w
+M-e C-space C-a left M-w
+C-s C-y C-r C-r RET C-e left C-y M-y M-y
+C-n C-y M-y
+C-a right del C-p right del C-p right del 
+
+C-s <!-- C-s C-s C-s C-s C-s RET left left left left C-space C-s --> RET M-w
+C-p C-space C-a M-w
+C-s C-y C-r C-r RET C-n C-n C-y M-y
+
+5.C-n C-a M-> DEL
+6.C-x u
+7. --> M-v M-v C-p C-p <!--
+8.7 occurances of <ol>
+C-s <ol> M-% <oL> RET space space space space space space space
+ex5
+

@@ -1,0 +1,94 @@
+ex1
+
+1. emacs exer1.html
+2. C-s HTML M-b
+3. C-s scavenger M-b
+4. C-s self-referential  M-b M-b
+5. C-s arrow M-b
+6. C-e
+7. C-a
+8. N/A
+9. N/A
+10. C-x C-c
+
+ex2
+1. emacs exer2.html
+2.C-s <!-- RET  M-a C-SP C-s --> RET DEL
+3. repeat 2
+4. repeat 2
+5. C-s <!-- RET left left left left C-SP C-s --> RET DEL
+repeat the above commands two more times
+
+ex3
+1.emacs exer3.html
+2.C-s Assignment 1 RET left 5
+repeat the above
+3.M-< C-s UTF-8 M-% US-ASCII C-g
+4.M-< C-s </ol> C-e RET
+
+ex4
+1.C-s <!-- RET left left left left C-SP C-s --> RET M-w C-s + SP SP C-r C-r RET M-a C-SP C-e M-w C-s C-y C-r C-r RET C-n C-y M-y
+2.C-s <!-- C-s  RET left left left left C-SP C-s --> RET M-w C-p C-p C-a C-SP C-e M-w C-s C-y C-r C-r RET C-n C-n C-y M-y
+
+3.C-s <!-- C-s C-s  RET left left left left C-SP C-s --> RET M-w M-{ M-{ C-SP C-e M-w C-s C-y C-r C-r RET C-n C-n C-y M-y
+C-a right del C-p right del 
+
+4.C-s <!-- C-s C-s  C-s RET left left left left C-SP C-s --> RET M-w
+C-s <!-- RET left left left left C-SP C-s --> RET M-w
+M-e C-SP C-a left M-w
+C-s C-y C-r C-r RET C-e left C-y M-y M-y
+C-n C-y M-y
+C-a right del C-p right del C-p right del 
+
+C-s <!-- C-s C-s C-s C-s C-s RET left left left left C-SP C-s --> RET M-w
+C-p C-SP C-a M-w
+C-s C-y C-r C-r RET C-n C-n C-y M-y
+
+5.C-n C-a M-> DEL
+6.C-x u
+7. --> M-v M-v C-p C-p <!--
+8.7 occurances of <ol>
+C-s <ol> M-% <oL> RET SP SP SP SP SP SP SP
+ex5
+
+ex5
+1.M-x make-directory RET ~/junk RET
+2.C-x C-f ~/junk/hello.c
+3.C-x b RET C-s #include SP RET left left left left left left left left M-} C-p right M-w M-< C-s &lt; M-% < RET SP SP M-< C-s &gt; M-% > RET SP SP M-< C-s &quot; M-% " RET SP SP 
+M-x compile RET ./hello RET
+4.M-x compile  ./hello C-x o C-x C-w hello-out RET
+5.
+-*- mode: compilation; default-directory: "~/junk/" -*-
+Compilation started at Sun Jan 14 22:25:39
+
+ ./hello
+#include <stdio.h>
+int
+main (void)
+{
+  char n = '\n';
+  char b = '\\';
+  char q = '"';
+  char const *p = "#include <stdio.h>%cint%cmain (void)%c{%c  \
+char n = '%cn';%c  char b = '%c%c';%c  char q = '%c';%c  char \
+const *p = %c%s%c;%c  printf (p, n, n, n, n, b, n, b, b, n, q,\
+ n, q, p, q, n, n, n, n);%c  return 0;%c}%c";
+  printf (p, n, n, n, n, b, n, b, b, n, q, n, q, p, q, n, n, n\
+, n);
+  return 0;
+}
+
+Compilation finished at Sun Jan 14 22:25:39
+
+
+ex6
+1. C-x b down down down
+2.(random) C-j
+3.(setq x (random))
+(setq y (random))
+4. (- x y)
+The output is -1755051284557597783 while x=2062503702352874109 and y=-794131031516916012
+5. M-: (- x y)
+The diffrence is that there is (#o236446342370526371651, #x27a4ce27c559f3a9) attached to the result. Also, it appears in the small window on the bototm.
+6.It cannot be mathematically random because it has to be generated according to some rule. Also, there is a size limit since setq will generate 64 bit integers. By definition, this will only be psudo-random.
+7.From a project in cs 33, we know that lisp object use the last two bits for type identification. So x and y are actually 62 bits. They range from -2^61 to 2^61-1.The output is (x-y)mod*(2^61). Drawing out the coordinate of x and y we see the region for which an incorrect answer is given is two triangles. Calculatin the extremas and calculate the probability with area ratio we get p=2^(2n)/(2^(n+1)-1)^2 When n=61 p is around 25%

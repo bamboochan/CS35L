@@ -1,0 +1,164 @@
+Feb 8
+-------
+1
+-----
+wget http://web.cs.ucla.edu/classes/winter18/cs35L/assign/coreutils.diff >lsbuggy.diff
+saved the diff file
+wget http://web.cs.ucla.edu/classes/winter18/cs35L/assign/coreutils-with-bug.tar.gz
+2
+------
+tar -xvf coreutils-with-bug.tar.gz
+
+3
+------
+cd coreutils-with-bug
+./configure --prefix='/u/eng/class/classmsu/cs35l/lab4/bcoreutils'
+make
+gives the following error
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^~~~~~~~
+
+4
+------
+patch -p0<../coreutils.diff
+to apply the patch
+make && make install
+5
+------
+Error before the patch happen because somewhere else a function futimens already exist with different parameter. Applying the patch changed the name of the same function to coreutils_futimens. So it's fine now
+
+6
+------
+reproduce the bug by writing the shell script of the commands that Prof Eggert used, except specifying which ls to use:
+emacs bug_repro
+----
+#!/bin/bash
+
+tmp=$(mktemp -d)
+cd $tmp
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+TZ=UTC0 ~/cs35l/lab4/bcoreutils/bin/ls -lt --full-time wwi-armistice now now1
+cd ~/cs35l/lab4/
+rm -rf $tmp
+
+----
+
+chmod +x bug_repro
+./bug_repro
+-rw-r--r-- 1 classmsu class 0 2018-02-13 23:03:07.873015654 -0800 now1
+-rw-r--r-- 1 classmsu class 0 2018-02-13 23:02:59.623877767 -0800 now
+-rw-r--r-- 1 classmsu class 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+just like we wound expect
+
+7
+------
+gdb
+break sort_files
+
+sort_files () at ls.c:2954
+2954	{
+(gdb) s
+2962	  if (! setjmp (failed_strcoll))
+(gdb) s
+s2964	      switch (sort_type)
+(gdb) s
+2969		  switch (time_type)
+(gdb) s
+2975		      func = sort_reverse ? rev_cmp_mtime : compare_mtime;
+(gdb) s
+3034	  qsort (files, files_index, sizeof *files, func);
+(gdb) s
+3035	}
+
+
+run it again
+
+(gdb) s
+2975		      func = sort_reverse ? rev_cmp_mtime : compare_mtime;
+(gdb) s
+3034	  qsort (files, files_index, sizeof *files, func);
+(gdb) info local
+func = 0x4067c0 <compare_mtime>
+
+(gdb) break compare_mtime
+Breakpoint 4 at 0x4067c0: file ../lib/timespec.h, line 48.
+(gdb) r
+cmp_mtime (cmp=0x4045f0 <xstrcoll>, b=0x617210, a=0x617160) at ls.c:2884
+2884	static int compare_mtime (V a, V b) { return cmp_mtime (a, b, xstrcoll); }
+so compare_time is just calling cmp_mtime
+
+(gdb) break cmp_mtime
+running it again, I see
+cmp_mtime (cmp=0x4045f0 <xstrcoll>, b=0x617210, a=0x617160) at ls.c:2884
+2884	static int compare_mtime (V a, V b) { return cmp_mtime (a, b, xstrcoll); }
+(gdb) s
+timespec_cmp (b=..., a=...) at ../lib/timespec.h:48
+48	  int diff = a.tv_sec - b.tv_sec;
+It looks suscipicious since it is calculating it in seconds. possible overflow
+
+(gdb) list
+2879	{
+2880	  int diff = timespec_cmp (get_stat_mtime (&b->stat),
+2881				   get_stat_mtime (&a->stat));
+2882	  return diff ? diff : cmp (a->name, b->name);
+2883	}
+
+Although get_stat_mtime is not in this file, we can guess it computes the mtime of the file in seconds relative to some fixed time
+
+The first time it run into compare_mtime
+(gdb) i local
+diff = 8
+second time:
+(gdb) i local
+diff = -1162549509
+So some overfow happened and caused the bug.
+
+We can see 8 is the difference in seconds of now and now1. and the difference of 1918 and 2018 is more than 99 years. In seconds, that is 3.12*10^9 seconds, which is more than INT_MAX. So it will treat it as if it is super recent
+
+
+8
+------
+After examining the sort_files, it calls qsort so computing diff exactly in timespec_cmp is not necessary. Inspired by a textbook problem in cs33, I wil fix this bug by changing subtraction to comparison in timespec_cmp.
+We find that function in lib
+cp timespec.h ../../timespec.h
+emacs to change
+diff -u coreutils-with-bug/lib/timespec.h timespec.h > coreutils-with-bug/mypatch.diff
+
+
+9
+-----
+check whether the bug works
+cd coreutils-with-bug
+patch -p1 <mypatch.diff
+make && make install
+./bug_repro again we see the bug get fixed
+emacs C-x 4-a to edit to changelog
+cp ChangeLog lab4.diff
+cat mypatch.diff >>lab4.diff
+
+10
+------
+cp bug_repro ../bug_repro
+edit the new bug_repro
+---
+#!/bin/bash                                                                                                   
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+rm wwi-armistice
+rm now
+rm now1
+cd ~/cs35l/lab4/
+---
+[classmsu@lnxsrv09 ~/cs35l/lab4]$ ./bug_repro
+-rw-r--r-- 1 classmsu class 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 classmsu class 0 2018-02-14 09:06:10.988257000 +0000 now1
+-rw-r--r-- 1 classmsu class 0 2018-02-14 09:06:09.982894000 +0000 now
+
+We see that seasnet cannot recognize an old date such as 1918, instead it treats it as if it is in the future (2054).This is because seasnet filesystem uses unsigned 32-bit time stamps. Time is store at seconds passed since 00:00:00 Coordinated Universal Time (UTC), Thursday, 1 January 1970 in Unix Time. So since it is using unsigned, it cannot express time before that time and 1918<1970

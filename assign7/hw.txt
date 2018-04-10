@@ -1,0 +1,32 @@
+Mingxi Sun
+CS35l
+TA:Littlenecker
+1
+------
+After the authentification stage, all the information sent between the client
+is encypted by the symmetric session key. So if a third person want to
+understand those messages, he has to know the session key. He can only get the
+session key during authentification stage. The session key is sent from the 
+client to the server after encrypted with the public key of the client. Even
+the snooper can view it, he cannot decrypt it without the client's private key.
+So the data is secure.
+
+(1)If the other teams had also tapped your keyboards and had observed all of 
+your team's keystrokes, then the information will not be secure any more. 
+Everytime when you ssh (or when you ssh-add if you are using ssh-agent), you 
+need to enter the passphrase. If the snooper knows the passphrase, he could
+know the private key of the client, thus decrypt the session key, thus decrypt everything.
+
+(2)If the other teams temporarily had physical control of the USB, the session
+will not be secure because the snooper will have full access to the private 
+and public key in the .ssh files as the root, thus being able to decipher 
+all the information exchanged.
+
+
+2
+------
+It is not really secure because a snooper can intercept the message and send
+his public key instead along with the file encrypted in his encryption. Then 
+gpg --verify will still pass because the file and the signature does match.
+One way to fix it is that the author can publish the public key and signature
+on the internet publicly. Then everyone downloading it can verify the author.

@@ -1,0 +1,55 @@
+CS 35l Winter 2018
+Prof: Eggert, TA: Littlenecker
+Mingxi Sun
+Assignment 6
+------------------------------
+0
+-----
+sort --version
+sort (GNU coreutils) 8.25
+So it's a new enough version.
+
+1
+-----
+od -An -f -N 40000000 < /dev/urandom | tr -s ' ' '\n' | sed '/^$/d'> random.txt
+to generate to generate a file with 10000000 floats
+We need to pass the argument 10M*4 because each float is 4 bytes 
+
+2: Test with no parallel option
+-----
+$ time -p sort -g random.txt > /dev/null
+real 21.59
+user 115.48
+sys 0.48
+
+3
+-----
+export PATH=/usr/local/cs/bin:$PATH
+
+4: 1 thread
+-----
+$ time -p sort -g --parallel=1 random.txt > /dev/null
+real 113.99
+user 113.71
+sys 0.27
+
+5: 2 thread
+--------
+$ time -p sort -g --parallel=2 random.txt > /dev/null
+real 59.54
+user 113.20
+sys 0.28
+
+6: 4 thread
+--------
+$ time -p sort -g --parallel=4 random.txt > /dev/null
+real 33.78
+user 114.06
+sys 0.35
+
+7: 8 threads
+-------
+time -p sort -g --parallel=8 random.txt > /dev/null
+real 21.50
+user 115.77
+sys 0.51

@@ -1,0 +1,9 @@
+1. -a -K keyword will search for all the commands that have a specific word in their man page. -a -k keyword will search for all the commands that have a specific word in their short description.
+
+2.
+/usr/local/cs/coreutils-8.29/share/man/man1/cp.1
+/usr/local/cs/coreutils-8.29/share/man/man1/wc.1.
+
+man man
+man -w cp
+man -w wc

@@ -1,0 +1,85 @@
+2. Make the new branch
+
+cd diffutils
+git checkout -b 'quote' 'v3.0'
+
+3. Apply patch
+
+patch -p1 < quote-3.0-patch.txt
+
+4 and 5. Run emacs C-x 4 a, and add the following message:
+
+src/cmp.c, src/diff.c, src/diff3.c, src/dir.c, src/sdiff.c, src/util.c
+Quote 'like this' in output.
+
+6. Commit
+
+git commit -aF ChangeLog
+
+7. Generate the patch:
+
+git format-patch -1 --stdout > formatted-patch.txt
+
+8. Get the patch from my partner and out it in ~/cs35l/devika/formatted-patch.txt
+
+Partner's name: Devika Karumathil Chaudhuri
+UID: 
+
+Then go to the diffutils repository and checkout another branch:
+
+git checkout -b 'partner' 'v3.0'
+
+And apply the patch:
+
+git am < ../devika/formatted-patch.txt
+
+Now we compile:
+
+./bootstrap
+./configure
+make
+make check
+
+following all the auxiliary steps as outlined in the lab report.
+
+9. We run
+
+make distdir
+
+which creates a directory diffutils-3.0.1-d793-dirty
+after we cd into it, we emacs the ChangeLog file and observe that the first entry 
+is our partner's log entry:
+
+2018-03-16  Devika Karumathil Chaudhuri  <devika@lnxsrv04.seas.ucla.edu>
+
+        2018-03-12 Devika Karumathil Chaudhuri <devika@lnxsrv04.seas.ucla.edu>
+                * cmp.c:
+
+                * util.c: added the patch quote-3.0-patch.txt
+
+                * sdiff.c: added the patch quote-3.0-patch.txt
+
+                * dir.c: added the patch quote-3.0-patch.txt
+
+                * diff3.c: added the patch quote-3.0-patch.txt
+
+                * diff.c: added the patch quote-3.0-patch.txt
+
+                * cmp.c: added the patch quote-3.0-patch.txt
+                
+
+10. Clone the repository and run gitk in it:
+
+First of all, I had to add /usr/local/cs/bin/ to PATH:
+
+export PATH="/usr/local/cs/bin/:$PATH"
+
+Now we can do the following:
+
+git clone ~eggert/src/gnu/emacs
+cd emacs
+gitk
+
+The latest merge up to and including 2015-01-25 is:
+
+Merge branch 'master' into xwidget 2015-01-25 12:19:27

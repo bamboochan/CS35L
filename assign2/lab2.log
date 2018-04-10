@@ -1,0 +1,45 @@
+jan 16
+------------
+1.
+tr -c 'A-Za-z' '[\n*]'
+tr -cs 'A-Za-z' '[\n*]'
+tr -cs 'A-Za-z' '[\n*]' | sort
+tr -cs 'A-Za-z' '[\n*]' | sort -u
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words
+The fist line translate anything that is not a letter (A-Z a-z) to a newline char
+The second line added -s. So it will replace sequences of one or more newline characters with a single newline.
+The third line added sort so it will sort the result alphabetically
+The fourth line pipes the output further to comm with words. The output has 3 columns. col1:unique to file1 col2:unique to col2 col3: unique lines that appear in both.
+the fourth colomn only prints out the first column. a.k.a words int assign2 that is not in words.
+
+
+jan 23
+------------
+1.wget get the hawaiian webpage hwnwdseng.htm
+2.want to replace <u>.</u> with .
+tr -d "<u>"|tr -d "</u>"| 
+3.want to output line that match<tr> <td>Eword</td> <td>Hword</td>
+grep <td>[^<]*[:alpha:]\{1,\}[^<]*</td>
+4.delete every second line
+5.delete <td> <\td>,change upper to lower  apostrophe
+6.delete the first newline char
+7.final
+ sed 's/<u>//g' | sed 's/<\/u>//g' | egrep '<td>.{1,}<\/td>' | sed -n '1~2!p'| sed 's\
+/<\/*td>//g' | tr [:upper:] [:lower:] | tr -cs 'pk`mnwlhaeiou' '[\n*]' | tr '`' "'" \
+| sort -u | sed '1,1d'
+
+jan 30
+------------
+1.chmod +x buildwords make buildwords executable
+2.cat hwnwdseng.htm | ./buildwords > hwords to make hawaiian dictionary
+3.cat assign2.html |
+    tr -cs 'A-Za-z' '[\n*]' |
+    tr '[:upper:]' '[:lower:]' |
+    sort -u | comm -23 - words | wc -w
+  check number of mispelled english words there are 38
+4.modified hawaiian word checker
+tr -cs "pk\'mnwlhaeiou" '[\n*]' | sort -u | comm -23 - hwords | wc -w check the number of misspelled hawaiian words. there are 198
+5.
+wiki is a word misspelled in english but not in hawaiian
+who is a word misspelled in hawaiian but not in english

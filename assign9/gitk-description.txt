@@ -1,0 +1,21 @@
+Top-left window:
+
+A tree of commits which show their relationships with the branches 
+and provide a graphical representation of merges.
+Below is the SHA1 ID of the commit.
+
+Top-middle window:
+
+Names and emails of commit authors
+
+Top-left window:
+
+Times and dates of commits.
+
+Bottom-left window:
+
+Information about the branches and version, along with the ChangeLog message.
+
+Bottom-right window:
+
+It is for comments, and is empty in our example.

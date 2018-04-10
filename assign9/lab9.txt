@@ -1,0 +1,314 @@
+1. Get the diffutils repository
+
+git clone ~eggert/src/gnu/diffutils
+
+2. Get the log of changes 
+
+git log > git-log.txt
+
+3. Get the list of tags
+
+git tag > git-tags.txt
+
+4. Use the Emacs 'C-s' command to find “maint: quote 'like this' or "like this", not `like this'”
+in git-log.txt. The SHA1 for this commit was 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f.
+Then generate the patch:
+
+git format-patch -1 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f --stdout > quote-patch.txt
+
+5. Check out version 3.0
+
+git checkout v3.0
+
+6. Apply the patch
+
+patch -p1 < quote-patch.txt
+
+Problems encountered:
+
+	Files not found: 
+
+	HACKING, doc/diffutils.texi, man/help2man
+
+	Rejections: 
+
+	README at 9, 60
+	README-hacking at 19
+	src/diff.c at 876, 906, 942
+	src/diff3.c at 433
+
+7. Get the status
+
+git status
+
+	Output:
+
+	# HEAD detached at v3.0
+	# Changes not staged for commit:
+	#   (use "git add <file>..." to update what will be committed)
+	#   (use "git checkout -- <file>..." to discard changes in working directory)
+	#
+	#	modified:   NEWS
+	#	modified:   README
+	#	modified:   TODO
+	#	modified:   doc/diagmeet.note
+	#	modified:   ms/config.bat
+	#	modified:   ms/config.site
+	#	modified:   po/en.po
+	#	modified:   src/analyze.c
+	#	modified:   src/cmp.c
+	#	modified:   src/context.c
+	#	modified:   src/diff.c
+	#	modified:   src/diff.h
+	#	modified:   src/diff3.c
+	#	modified:   src/dir.c
+	#	modified:   src/ifdef.c
+	#	modified:   src/io.c
+	#	modified:   src/sdiff.c
+	#	modified:   src/side.c
+	#	modified:   src/system.h
+	#	modified:   src/util.c
+	#	modified:   tests/help-version
+	#
+	# Untracked files:
+	#   (use "git add <file>..." to include in what will be committed)
+	#
+	#	NEWS.orig
+	#	README-hacking.orig
+	#	README-hacking.rej
+	#	README.orig
+	#	README.rej
+	#	cfg.mk.orig
+	#	cfg.mk.rej
+	#	git-log.txt
+	#	git-tag.txt
+	#	ms/config.site.orig
+	#	quote-patch.txt
+	#	src/cmp.c.orig
+	#	src/context.c.orig
+	#	src/diff.c.orig
+	#	src/diff.c.rej
+	#	src/diff.h.orig
+	#	src/diff3.c.orig
+	#	src/diff3.c.rej
+	#	src/dir.c.orig
+	#	src/sdiff.c.orig
+	#	src/system.h.orig
+	#	src/util.c.orig
+	#	tests/help-version.orig
+	no changes added to commit (use "git add" and/or "git commit -a")
+
+9. For the non-c files, aka NEWS, README, TODO, doc/diagmeet.note, ms/config.bat,
+ms/config.site, po/en.po, src/diff.h, src/system.h, tests/help-version
+use the emacs command vc-revert to revert the changes.
+
+For the c files, which were 
+
+analyze.c, cmp.c, context.c,
+diff.c, diff3.c, dir.c, ifdef.c, io.c, sdiff.c,
+side.c, util.c 
+
+we go through enter the diff mode in Emacs using 'C-x v =', and then 
+go through the patches with 'n' and revert the necessary ones with 'C-u C-c C-a'
+
+10. We have to apply some more changes manually to diff.c and diff3.c. 
+We do that using the emacs 'C-s' search command looking at the .rej file.
+
+11. To remove untracted files, do
+
+git clean -f
+
+12. 'git status' reports 6 modified files:
+
+	# HEAD detached at v3.0
+	# Changes not staged for commit:
+	#   (use "git add <file>..." to update what will be committed)
+	#   (use "git checkout -- <file>..." to discard changes in working directory)
+	#
+	#	modified:   src/cmp.c
+	#	modified:   src/diff.c
+	#	modified:   src/diff3.c
+	#	modified:   src/dir.c
+	#	modified:   src/sdiff.c
+	#	modified:   src/util.c
+	#
+	no changes added to commit (use "git add" and/or "git commit -a")
+	
+We then generate the new patch:
+
+git diff > quote-3.0-patch.txt
+
+13. First we switch to lnxsrv01 so we don't have to apply the additional patch. 
+Them we add the relevant executables to the PATH:
+
+export PATH="/usr/local/cs/bin/:$PATH"
+
+Then we follows the README-hacking file:
+
+./bootstrap
+./configure
+make
+make check
+
+Initially the 'make check' step gave me the following error:
+
+	/bin/sh: /bin/sh: cannot execute binary file
+	Makefile:1309: recipe for target 'basic.log' failed
+	make[3]: *** [basic.log] Error 126
+	make[3]: Leaving directory '/w/home.18/class/classmsu/cs35l/diffutils/tests'
+	Makefile:1288: recipe for target 'check-TESTS' failed
+	make[2]: *** [check-TESTS] Error 2
+	make[2]: Leaving directory '/w/home.18/class/classmsu/cs35l/diffutils/tests'
+	Makefile:1403: recipe for target 'check-am' failed
+	make[1]: *** [check-am] Error 2
+	make[1]: Leaving directory '/w/home.18/class/classmsu/cs35l/diffutils/tests'
+	Makefile:1016: recipe for target 'check-recursive' failed
+	make: *** [check-recursive] Error 1
+	
+As suggested in a piazza post, if was fixed by changing the line
+
+-; shell_or_perl_
++;
+
+in the file tests/Makefile.am and then running 
+
+chmod +x tests/binary tests/no-newline-at-eof
+
+After this I re-ran the commands from README-hacking, and they succeeded.
+Then we check the patch:
+
+cd src
+diff . -
+
+	Output:
+	diff: cannot compare '-' to a directory
+
+diff --help
+
+	Output:
+	Usage: diff [OPTION]... FILES
+	Compare FILES line by line.
+
+	Mandatory arguments to long options are mandatory for short options too.
+				--normal                  output a normal diff (the default)
+		-q, --brief                   report only when files differ
+		-s, --report-identical-files  report when two files are the same
+		-c, -C NUM, --context[=NUM]   output NUM (default 3) lines of copied context
+		-u, -U NUM, --unified[=NUM]   output NUM (default 3) lines of unified context
+		-e, --ed                      output an ed script
+		-n, --rcs                     output an RCS format diff
+		-y, --side-by-side            output in two columns
+		-W, --width=NUM               output at most NUM (default 130) print columns
+				--left-column             output only the left column of common lines
+				--suppress-common-lines   do not output common lines
+
+		-p, --show-c-function         show which C function each change is in
+		-F, --show-function-line=RE   show the most recent line matching RE
+				--label LABEL             use LABEL instead of file name
+																		(can be repeated)
+
+		-t, --expand-tabs             expand tabs to spaces in output
+		-T, --initial-tab             make tabs line up by prepending a tab
+				--tabsize=NUM             tab stops every NUM (default 8) print columns
+				--suppress-blank-empty    suppress space or tab before empty output lines
+		-l, --paginate                pass output through 'pr' to paginate it
+
+		-r, --recursive                 recursively compare any subdirectories found
+				--no-dereference            don't follow symbolic links
+		-N, --new-file                  treat absent files as empty
+				--unidirectional-new-file   treat absent first files as empty
+				--ignore-file-name-case     ignore case when comparing file names
+				--no-ignore-file-name-case  consider case when comparing file names
+		-x, --exclude=PAT               exclude files that match PAT
+		-X, --exclude-from=FILE         exclude files that match any pattern in FILE
+		-S, --starting-file=FILE        start with FILE when comparing directories
+				--from-file=FILE1           compare FILE1 to all operands;
+																			FILE1 can be a directory
+				--to-file=FILE2             compare all operands to FILE2;
+																			FILE2 can be a directory
+
+		-i, --ignore-case               ignore case differences in file contents
+		-E, --ignore-tab-expansion      ignore changes due to tab expansion
+		-Z, --ignore-trailing-space     ignore white space at line end
+		-b, --ignore-space-change       ignore changes in the amount of white space
+		-w, --ignore-all-space          ignore all white space
+		-B, --ignore-blank-lines        ignore changes where lines are all blank
+		-I, --ignore-matching-lines=RE  ignore changes where all lines match RE
+
+		-a, --text                      treat all files as text
+				--strip-trailing-cr         strip trailing carriage return on input
+
+		-D, --ifdef=NAME                output merged file with '#ifdef NAME' diffs
+				--GTYPE-group-format=GFMT   format GTYPE input groups with GFMT
+				--line-format=LFMT          format all input lines with LFMT
+				--LTYPE-line-format=LFMT    format LTYPE input lines with LFMT
+			These format options provide fine-grained control over the output
+				of diff, generalizing -D/--ifdef.
+			LTYPE is 'old', 'new', or 'unchanged'.  GTYPE is LTYPE or 'changed'.
+			GFMT (only) may contain:
+				%<  lines from FILE1
+				%>  lines from FILE2
+				%=  lines common to FILE1 and FILE2
+				%[-][WIDTH][.[PREC]]{doxX}LETTER  printf-style spec for LETTER
+					LETTERs are as follows for new group, lower case for old group:
+						F  first line number
+						L  last line number
+						N  number of lines = L-F+1
+						E  F-1
+						M  L+1
+				%(A=B?T:E)  if A equals B then T else E
+			LFMT (only) may contain:
+				%L  contents of line
+				%l  contents of line, excluding any trailing newline
+				%[-][WIDTH][.[PREC]]{doxX}n  printf-style spec for input line number
+			Both GFMT and LFMT may contain:
+				%%  %
+				%c'C'  the single character C
+				%c'\OOO'  the character with octal code OOO
+				C    the character C (other characters represent themselves)
+
+		-d, --minimal            try hard to find a smaller set of changes
+				--horizon-lines=NUM  keep NUM lines of the common prefix and suffix
+				--speed-large-files  assume large files and many scattered small changes
+
+				--help               display this help and exit
+		-v, --version            output version information and exit
+
+	FILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE...' or 'FILE... DIR'.
+	If --from-file or --to-file is given, there are no restrictions on FILE(s).
+	If a FILE is '-', read standard input.
+	Exit status is 0 if inputs are the same, 1 if different, 2 if trouble.
+
+	Report bugs to: bug-diffutils@gnu.org
+	GNU diffutils home page: <http://www.gnu.org/software/diffutils/>
+	General help using GNU software: <http://www.gnu.org/gethelp/>
+	
+We see that the issue is successfully fixed.
+
+14. Set up the two versions of diff:
+
+
+cp ./src/* ../diffutils-3.0-patch/
+cd ..
+git clone ~eggert/src/gnu/diffutils diffutils-orig
+cd diffutils-orig
+git checkout v3.0
+mkdir ../diffutils-3.0
+cp ./src/* ../diffutils-3.0
+cd ..
+
+Then run our new diff:
+
+diffutils-3.0-patch/diff -pru diffutils-3.0 diffutils-3.0-patch >quote-3.0-test.txt
+
+
+15. Run 
+
+diff quote-3.0-test.txt diffutils/quote-3.0-patch.txt
+
+We see a lot of differences, but they are related to the file paths, 
+line length and the order in which files are compared: it seems like the order in
+which diff.c and diff3.c are compared is switched. We conclude that the differences
+are innocuous. 
+
+

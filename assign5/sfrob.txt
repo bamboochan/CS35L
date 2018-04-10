@@ -1,0 +1,133 @@
+First we need to generate a big frobicated file
+I will frobicate the file words (all English words from dictionary) from Assignment 2.
+I wrote a c script to frobicate the file:
+genfrob.c
+#define _GNU_SOURCE
+#include <string.h>
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/stat.h>
+#include <stdlib.h>
+int main(void)
+{
+  struct stat fS;
+  if(fstat(0,&fS) < 0)
+    {
+      fprintf(stderr, "Error with the file");
+      exit(1);
+   }
+  int size=fS.st_size;
+  char* nakedwords;
+  if(S_ISREG(fS.st_mode))
+      nakedwords = (char*)malloc(size * sizeof(char));
+  else{
+    fprintf(stderr, "Not regular file");
+    exit(1);
+  }
+  int nread = read(0, nakedwords, size);
+  memfrob(nakedwords,size);
+  write(1,nakedwords,size);
+}
+./genfrob < words > fwords
+The result is a file of 4.8M
+I have another file(f1) with the test case provided on the wesite.
+*~BO *{_CIA *hXE]D *LER #@_GZY #E\\OX #^BO #FKPS #NEM\4
+By copying f1 many times, I generate f2 of size 7.7k
+
+
+Comparison on running on big regular file(4.8M)(write to file)
+--------------------------------------------------------
+time ./sfrob <fword >out
+real	0m0.654s
+user	0m0.514s
+sys	0m0.025s
+
+time ./sfrobu  <fwords >outu
+real	0m6.447s
+user	0m0.917s
+sys	0m5.455s
+
+time ./sfrobu  -f <fwords >outuf
+real	0m6.886s
+user	0m0.961s
+sys	0m5.687s
+
+time ./sfrobs  -f <fwords >outsf
+real	0m0.294s
+user	0m0.181s
+sys	0m0.039s
+
+time ./sfrobs  <fwords >outs
+real	0m0.262s
+user	0m0.188s
+sys	0m0.031s
+
+Comparison on running on small(55) regular file(write to terminal)
+--------------------------------------------------------
+time ./sfrobs  <fwords
+real	0m3.536s
+user	0m0.233s
+sys	0m0.240s
+
+time ./sfrobs  <f1
+real	0m0.009s
+user	0m0.000s
+sys	0m0.008s
+
+time ./sfrob  <f1
+real	0m0.002s
+user	0m0.000s
+sys	0m0.002s
+
+time ./sfrobu  <f1
+real	0m0.007s
+user	0m0.001s
+sys	0m0.006s
+
+Comparison on running on Medium size(7K) regular files (write to file)
+-----------------------------------------------------------------
+time ./sfrobs  <f2 >outm
+real	0m0.012s
+user	0m0.003s
+sys	0m0.006s
+
+time ./sfrob  <f2 >outm
+real	0m0.006s
+user	0m0.001s
+sys	0m0.002s
+
+Comparison on Medium large(368k) regular file(write to file)
+------------------------------------------------------------
+time ./sfrobs  <f2 >outm
+real	0m0.034s
+user	0m0.020s
+sys	0m0.008s
+
+time ./sfrob  <f2 >outm
+real	0m0.059s
+user	0m0.050s
+sys	0m0.001s
+
+
+Qualiative comparison
+---------------------
+We can see that sfrob and sfrobs are significantly faster than sfrobu because the use of buffer reduces system calls.
+-f doesn't affect time very much.
+For smaller size regular files, sfrob is better than sfrobs.
+But for files of magnitude greater than 100k, sfrobs is faster than sfrob.
+This probably is because shell script is highly optimized.
+
+
+Number of comparisons and number of lines
+-----------------------------------------
+run sfrobu on three files get the result below. We know that qsort has complexity nlogn
+
+# of lines | # of comparisons
+-----------------------------
+9          |17
+60480      |841152
+479828     |5274366
+
+f(n)=0.82*n*ln(n)+139051 where n is the number of lines
+this fit has correlation coefficient 0.999 when linearly regressing the number of comparisons to n*ln(n).
+This suggestion the assymtotics are nlogn, which agrees with theoretical average case complexity of qsort.

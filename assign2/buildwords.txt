@@ -1,0 +1,1 @@
+sed 's/<u>//g' | sed 's/<\/u>//g' | egrep '<td>.{1,}<\/td>' | sed -n '1~2!p' | sed 's/<\/*td>//g' | tr [:upper:] [:lower:] | tr -cs 'pk`mnwlhaeiou' '[\n*]' | tr '`' "'" | sort -u | sed '1,1d'

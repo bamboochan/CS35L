@@ -1,0 +1,50 @@
+#!/bin/bash
+og=$IFS
+IFS=$'\n'
+dir=$1
+files=`ls $dir | sort`
+hfiles=`ls -a $dir | grep '^\.' | sort`
+i=0
+declare -a arr
+
+for f in $hfiles
+do
+   # echo "$dir/$f"
+    if [ -L "$dir/$f" ] #test for sym links
+    then :
+    elif [ ! -f "$dir/$f" ] #test for not reg files
+    then :
+    elif [ ! -r "$dir/$f" ]
+    then echo "$dir/$f is not readable"
+    else
+    arr[$i]="$dir/$f"
+    let i++
+    fi
+done
+
+for g in $files
+do
+   # echo "$dir/$f"
+    if [ -L "$dir/$g" ] #test for sym links
+    then :
+    elif [ ! -f "$dir/$g" ] #test for not reg files
+    then :
+    elif [ ! -r "$dir/$g" ]
+    then echo "$dir/$g is not readable"
+    else
+    arr[$i]="$dir/$g"
+    let i++
+    fi
+done
+
+
+
+
+for(( j=0; j<i; j++)) do # echo  ${arr[$k]}
+for(( k=0; k<j; k++)) do
+
+cmp --silent ${arr[$j]} ${arr[$k]} &&  ln -fL ${arr[$k]} ${arr[$j]} && echo "linked" && break
+done
+done
+
+IFS=$og

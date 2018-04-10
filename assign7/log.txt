@@ -1,0 +1,41 @@
+I did the lab with two other classmates. Kyrill and Theo.
+We had two beaglebone boards(B1,B2). We each tried to log on to both.
+
+1
+----
+We checked that we have open ssh installed already.
+sudo apt-get install openssh-server
+sudo apt-get install openssh-client
+
+2
+----
+Setup server
+ssh-keygen default location, no password
+sudo useradd –d /home/theodir –m theo
+sudo passwd 123
+cd /home/theodir
+sudo mkdir .ssh
+sudo chown -R theo .ssh
+sudo chmod 700 .ssh
+ifconfig //remember the ip which was 192.232.123.61
+
+Then the same for kyrill with kyrilldir and same password
+
+
+3
+-----
+Setup client(Theo's computer to my beaglebone)
+
+ssh-keygen
+ssh-copy-id -i theo@192.232.123.61
+ssh-add
+ssh theo@192.232.123.61
+We tried that you can ls mkdir touch cp now
+exit
+ssh theo@192.232.123.61
+We tried firefox and xterm
+
+We then used this similar procedure for Kyrill's computer to my Beaglebone and
+my Beaglebone to Theo's Beaglebone. Everything works.
+We then tried to connect from one beaglebone to another.
+For X forwarding, we can open firefox after both beaglebone has firefox.

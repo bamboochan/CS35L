@@ -1,0 +1,35 @@
+Feb 2.
+----------
+1.wget website to get coreutils 7.6
+2.tar -xzvf coreutils-7.6.tar.gz untar the zip file
+3.locale see that en_US.UTF-8 is set already
+4.emacs INSTALL 
+5.configure ./configure --prefix=/u/eng/class/classmsu/cs35l/lab3
+make && make install to install coreutils 6.7
+6.
+cd coreutils-7.6/src 
+./ls -l /bin/bash to recreate the error
+output:
+-rwxr-xr-x 1 root root 960632 2017-08-03 06:36 /bin/bash
+7.patch -p1 >patchfile to apply the patch
+8.make output:
+make  all-am
+make[1]: Entering directory `/w/home.18/class/classmsu/cs35l/lab3/coreutils-7.6/src'
+  CC     ls.o
+  CCLD   dir
+  CCLD   vdir
+  CCLD   ls
+make[1]: Leaving directory `/w/home.18/class/classmsu/cs35l/lab3/coreutils-7.6/src'
+Since we changed ls program, naturally it gets made again.dir vdir lists directory content inside the program ls is used, which is why they appear in the make output as well. They also got re-made. Other programs didn't change so no commands regarding them are executed
+9. The bug gets fixed: in ~/cs35l/lab3/bin ./ls -l /bin/bash
+-rwxr-xr-x 1 root root 960632 2017-08-03 06:36 /bin/bash
+But in ~/cs35l/lab3/coreutils-7.6/src ./ls -l /bin/bash outputs 
+-rwxr-xr-x 1 root root 960632 Aug  3  2017 /bin/bash
+10.
+touch file1 --date="Sun, 29 Feb 2004 16:21:42 -0800" to change the file modification time
+[classmsu@lnxsrv09 ~/cs35l/lab3]$ bin/./ls -l file1
+-rw-r--r-- 1 classmsu class 3 2004-02-29 16:21 file1
+[classmsu@lnxsrv09 ~/cs35l/lab3/coreutils-7.6]$ src/./ls -l ~/cs35l/lab3/file1 
+-rw-r--r-- 1 classmsu class 3 Feb 29  2004 /u/eng/class/classmsu/cs35l/lab3/file1
+
+For the buggy version, output of ls -l of is the same format for files one year old but for the fixed version, if the file is one year or older, it shows year instead of time
